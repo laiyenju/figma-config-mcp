@@ -2,15 +2,35 @@
   "name": "figma-config-2026-mcp",
   "version": "1.0.0",
   "type": "module",
-  "description": "MCP server for Figma Config 2026 agenda, sessions, and speakers",
+  "description": "MCP server for Figma Config 2026 — query sessions, speakers, and agenda from any MCP-compatible AI client",
+  "keywords": [
+    "figma",
+    "figma-config",
+    "mcp",
+    "model-context-protocol",
+    "conference",
+    "claude",
+    "llm"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yenlai/figma-config-llms-txt"
+  },
+  "homepage": "https://github.com/yenlai/figma-config-llms-txt#readme",
+  "engines": {
+    "node": ">=18"
+  },
   "bin": {
     "figma-config-2026-mcp": "./dist/index.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "scripts": {
     "build": "tsup",
+    "prepublishOnly": "pnpm build",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

@@ -2,15 +2,36 @@
   "name": "figma-config-llms-txt",
   "version": "1.0.0",
   "type": "module",
-  "description": "Convert Figma Config 2026 to LLM-friendly Markdown and llms.txt",
+  "description": "Convert Figma Config 2026 sessions, speakers, and agenda to LLM-friendly Markdown and llms.txt",
+  "keywords": [
+    "figma",
+    "figma-config",
+    "llms.txt",
+    "llms",
+    "conference",
+    "cli",
+    "markdown",
+    "scraper"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yenlai/figma-config-llms-txt"
+  },
+  "homepage": "https://github.com/yenlai/figma-config-llms-txt#readme",
+  "engines": {
+    "node": ">=18"
+  },
   "bin": {
     "figma-config-llms-txt": "./dist/index.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "scripts": {
     "build": "tsup",
+    "prepublishOnly": "pnpm build",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
