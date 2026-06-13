@@ -79,7 +79,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
             text = getSpeakers(data, args as Parameters<typeof getSpeakers>[1]);
             break;
           case 'search_sessions':
-            text = searchSessions(data, args as Parameters<typeof searchSessions>[1]);
+            text = searchSessions(data, args as unknown as Parameters<typeof searchSessions>[1]);
             break;
           case 'get_event_summary':
             text = getEventSummary(data);
