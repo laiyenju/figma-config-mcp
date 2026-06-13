@@ -1,0 +1,23 @@
+{
+  "name": "figma-config-2026-mcp",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "MCP server for Figma Config 2026 agenda, sessions, and speakers",
+  "bin": {
+    "figma-config-2026-mcp": "./dist/index.js"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@figma-config/core": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "fuse.js": "^7.0.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  }
+}

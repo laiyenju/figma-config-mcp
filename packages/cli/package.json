@@ -1,0 +1,23 @@
+{
+  "name": "figma-config-llms-txt",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Convert Figma Config 2026 to LLM-friendly Markdown and llms.txt",
+  "bin": {
+    "figma-config-llms-txt": "./dist/index.js"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@figma-config/core": "workspace:*",
+    "commander": "^12.0.0",
+    "ora": "^8.0.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  }
+}
