@@ -6,7 +6,9 @@
   "bin": {
     "figma-config-2026-mcp": "./dist/index.js"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit"
@@ -17,6 +19,7 @@
     "fuse.js": "^7.0.0"
   },
   "devDependencies": {
+    "@types/node": "^25.9.3",
     "tsup": "^8.0.0",
     "typescript": "^5.0.0"
   }

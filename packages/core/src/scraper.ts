@@ -1,4 +1,5 @@
-import { getCached, setCached } from './cache.js';
+import { join } from 'node:path';
+import { getCached, setCached, CACHE_DIR } from './cache.js';
 
 const ALLOWED_PATHS = ['/session/', '/event/', '/speakers/', '/agenda/', '/sponsors/', '/faq/'];
 const USER_AGENT = 'figma-config-llms-txt/1.0 (+https://github.com/figma-config/llms-txt)';
@@ -13,6 +14,7 @@ export interface ScrapeOptions {
   delay?: number;
   cacheOnly?: boolean;
   refresh?: boolean;
+  only?: string[]; // path segments to include, e.g. ['sessions', 'events']
 }
 
 export type ProgressCallback = (url: string, index: number, total: number) => void;
@@ -86,7 +88,7 @@ export async function scrapeAll(
 
   if (errors.length > 0) {
     const { writeFile } = await import('node:fs/promises');
-    await writeFile('error.log', errors.join('\n'), 'utf-8').catch(() => {});
+    await writeFile(join(CACHE_DIR, 'error.log'), errors.join('\n'), 'utf-8').catch(() => {});
   }
 
   return results;

@@ -14,16 +14,37 @@ import {
 const DATA_CACHE_KEY = 'data.json';
 const DEFAULT_EVENT = 'san-francisco';
 
+let scrapePromise: Promise<ParsedData> | null = null;
+
 async function loadData(): Promise<ParsedData> {
+  // Fast path: a scrape is already running — share it instead of starting a second one
+  if (scrapePromise) return scrapePromise;
+
   const stale = await isCacheStale(DATA_CACHE_KEY);
   if (!stale) {
     const raw = await getCached(DATA_CACHE_KEY);
-    if (raw) return JSON.parse(raw) as ParsedData;
+    if (raw) {
+      try {
+        return JSON.parse(raw) as ParsedData;
+      } catch {
+        // Corrupted cache — fall through to re-scrape
+      }
+    }
   }
-  // Cache missing or expired — auto-scrape (first run or 24h refresh)
-  const data = await buildData(DEFAULT_EVENT);
-  await setCached(DATA_CACHE_KEY, JSON.stringify(data));
-  return data;
+
+  // Re-check after awaits: another call may have started scraping while we waited
+  if (scrapePromise) return scrapePromise;
+
+  scrapePromise = buildData(DEFAULT_EVENT)
+    .then(async data => {
+      await setCached(DATA_CACHE_KEY, JSON.stringify(data));
+      return data;
+    })
+    .finally(() => {
+      scrapePromise = null;
+    });
+
+  return scrapePromise;
 }
 
 const server = new Server(
@@ -110,7 +131,7 @@ server.setRequestHandler(CallToolRequestSchema, async request => {
       content = getSpeakers(data, args as Parameters<typeof getSpeakers>[1]);
       break;
     case 'search_sessions':
-      content = searchSessions(data, args as Parameters<typeof searchSessions>[1]);
+      content = searchSessions(data, args as unknown as Parameters<typeof searchSessions>[1]);
       break;
     case 'get_event_summary':
       content = getEventSummary(data);

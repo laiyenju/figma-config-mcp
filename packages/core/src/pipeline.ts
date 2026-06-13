@@ -1,5 +1,5 @@
 import { fetchSitemap, scrapeAll } from './scraper.js';
-import { parseSessionPage, parseAgendaPage, parseSpeakersPage, classifyUrl } from './parser.js';
+import { parseSessionPage, parseSpeakersPage, classifyUrl } from './parser.js';
 import type { ParsedData, Session, Speaker } from './types.js';
 import type { ScrapeOptions, ProgressCallback } from './scraper.js';
 
@@ -8,7 +8,11 @@ export async function buildData(
   opts?: ScrapeOptions,
   onProgress?: ProgressCallback,
 ): Promise<ParsedData> {
-  const urls = await fetchSitemap(event);
+  const allUrls = await fetchSitemap(event);
+  const urls =
+    opts?.only?.length
+      ? allUrls.filter(url => opts.only!.some(t => url.includes(`/${t}`)))
+      : allUrls;
   const htmlMap = await scrapeAll(urls, opts, onProgress);
 
   const sessions: Session[] = [];
@@ -20,8 +24,6 @@ export async function buildData(
       sessions.push(parseSessionPage(html, url));
     } else if (type === 'speakers') {
       speakers.push(...parseSpeakersPage(html));
-    } else if (type === 'agenda') {
-      parseAgendaPage(html); // SSR only has featured sessions; agenda rebuilt below
     }
   }
 

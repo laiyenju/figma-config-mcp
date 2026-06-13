@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import ora from 'ora';
 import { mkdir } from 'node:fs/promises';
-import { buildData, writeOutput, setCached, fetchSitemap } from '@figma-config/core';
+import { buildData, writeOutput, setCached } from '@figma-config/core';
 
 const program = new Command();
 
@@ -38,14 +38,6 @@ async function run(): Promise<void> {
   try {
     await mkdir(opts.output, { recursive: true });
 
-    // Preview URL count before full scrape when --only filter is active
-    if (opts.only) {
-      const allUrls = await fetchSitemap(opts.event);
-      const only = opts.only.split(',').map(s => s.trim());
-      const filtered = allUrls.filter(url => only.some(t => url.includes(`/${t}`)));
-      spinner.succeed(`Found ${filtered.length} URLs (filtered)`);
-    }
-
     spinner.start('Scraping...');
     const data = await buildData(
       opts.event,
@@ -53,6 +45,7 @@ async function run(): Promise<void> {
         delay: parseInt(opts.delay, 10),
         cacheOnly: opts.cacheOnly,
         refresh: opts.refresh,
+        only: opts.only ? opts.only.split(',').map(s => s.trim()) : undefined,
       },
       (url, i, total) => {
         spinner.text = opts.verbose
