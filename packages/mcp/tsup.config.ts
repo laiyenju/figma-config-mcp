@@ -8,5 +8,5 @@ export default defineConfig({
   clean: true,
   target: 'node18',
   banner: { js: '#!/usr/bin/env node' },
-  noExternal: ['@figma-config/core'],
+  platform: 'node',
 });

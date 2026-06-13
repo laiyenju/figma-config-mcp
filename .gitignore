@@ -3,5 +3,6 @@ dist/
 *.log
 coverage/
 figma-config-output/
+e2e-output/
 .DS_Store
 notes/
