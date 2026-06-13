@@ -6,3 +6,5 @@ figma-config-output/
 e2e-output/
 .DS_Store
 notes/
+mcp-*.txt
+.vercel/
