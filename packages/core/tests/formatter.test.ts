@@ -1,9 +1,14 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterAll } from 'vitest';
+import { rm } from 'node:fs/promises';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import {
   formatLlmsTxt,
   formatSessionMd,
   formatAgendaMd,
   formatSpeakersMd,
+  formatLlmsFullTxt,
+  writeOutput,
 } from '../src/formatter.js';
 import type { ParsedData, Session, Speaker, AgendaDay } from '../src/types.js';
 
@@ -94,5 +99,43 @@ describe('formatSpeakersMd', () => {
     const md = formatSpeakersMd(doubled);
     const count = (md.match(/## Dylan Field/g) ?? []).length;
     expect(count).toBe(1);
+  });
+});
+
+describe('formatLlmsFullTxt', () => {
+  it('includes the llms.txt index header', () => {
+    expect(formatLlmsFullTxt(mockData)).toMatch(/^# Figma Config 2026/);
+  });
+
+  it('includes individual session content separated by ---', () => {
+    const out = formatLlmsFullTxt(mockData);
+    expect(out).toContain('---');
+    expect(out).toContain('Opening keynote by Dylan Field');
+  });
+});
+
+describe('writeOutput', () => {
+  const outDir = join(tmpdir(), `figma-config-test-${process.pid}`);
+
+  afterAll(async () => {
+    await rm(outDir, { recursive: true, force: true });
+  });
+
+  it('writes all expected files', async () => {
+    await writeOutput(mockData, outDir);
+    const { readdir } = await import('node:fs/promises');
+    const files = await readdir(outDir);
+    expect(files).toContain('llms.txt');
+    expect(files).toContain('llms-full.txt');
+    expect(files).toContain('agenda.md');
+    expect(files).toContain('speakers.md');
+    expect(files).toContain('data.json');
+    expect(files).toContain('sessions');
+  });
+
+  it('writes one markdown file per session', async () => {
+    const { readdir } = await import('node:fs/promises');
+    const sessions = await readdir(join(outDir, 'sessions'));
+    expect(sessions).toContain(`${mockSession.id}.md`);
   });
 });

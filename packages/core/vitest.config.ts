@@ -6,6 +6,10 @@ export default defineConfig({
     coverage: {
       reporter: ['text', 'lcov'],
       threshold: { lines: 80 },
+      exclude: [
+        'src/index.ts',    // barrel re-exports only
+        'src/scraper.ts',  // network I/O — covered by integration tests
+      ],
     },
   },
 });
