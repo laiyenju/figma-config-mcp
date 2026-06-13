@@ -42,6 +42,26 @@ export interface GetAgendaInput {
 export function getAgenda(data: ParsedData, input: GetAgendaInput): string {
   const { date, tag, stage, format = 'markdown' } = input;
 
+  // No filters — return a day-by-day summary instead of all sessions
+  if (!date && !tag && !stage) {
+    const lines = ['## Figma Config 2026 — Agenda Overview', ''];
+    lines.push('| Date | Sessions |');
+    lines.push('|---|---|');
+    for (const day of data.agenda) {
+      lines.push(`| ${day.date} | ${day.sessions.length} sessions |`);
+    }
+    const total = data.agenda.reduce((n, d) => n + d.sessions.length, 0);
+    lines.push(`| **Total** | **${total} sessions** |`);
+    lines.push('');
+    lines.push('**Filter options:**');
+    lines.push('- By date: `date: "june-23"` / `"june-24"` / `"june-25"`');
+    lines.push('- By topic: `tag: "AI"` / `"Keynote"` / `"UX"` etc.');
+    lines.push('- By stage: `stage: "Main Stage"` / `"Mezzanine Stage"` / `"Config Commons"`');
+    lines.push('');
+    lines.push('For keyword search, use `search_sessions` instead.');
+    return lines.join('\n');
+  }
+
   let days: AgendaDay[] = data.agenda;
 
   if (date) {

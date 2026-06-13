@@ -12,7 +12,7 @@ import {
 export const TOOLS = [
   {
     name: 'get_agenda',
-    description: 'Get Figma Config 2026 agenda, filterable by date, tag, and stage',
+    description: 'Get Figma Config 2026 agenda. Without filters, returns a day-by-day summary with session counts. Add date / tag / stage filters to get the full session list for that slice. For keyword or topic searches, prefer search_sessions.',
     inputSchema: {
       type: 'object',
       properties: {
