@@ -1,21 +1,22 @@
-import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 import { createMcpServer } from '../src/server.js';
 import type { ParsedData } from '@figma-config/core';
-// @ts-ignore — esbuild handles JSON imports natively; NodeNext requires 'with' but Edge bundler doesn't support it yet
-import rawData from '../data/data.json';
 
-export const config = { runtime: 'edge' };
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// Cast from inferred JSON type to our domain type
-const data = rawData as unknown as ParsedData;
+// Load static data once — committed to repo, no scraping needed
+const data = JSON.parse(
+  readFileSync(join(__dirname, '../data/data.json'), 'utf-8'),
+) as ParsedData;
 
-export default async function handler(req: Request): Promise<Response> {
-  const transport = new WebStandardStreamableHTTPServerTransport({
-    sessionIdGenerator: undefined,
-  });
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
   const server = createMcpServer(data);
   await server.connect(transport);
-  const response = await transport.handleRequest(req);
+  await transport.handleRequest(req, res, req.body);
   await server.close();
-  return response;
 }
