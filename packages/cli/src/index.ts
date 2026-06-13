@@ -1,17 +1,7 @@
 import { Command } from 'commander';
 import ora from 'ora';
 import { mkdir } from 'node:fs/promises';
-import {
-  fetchSitemap,
-  scrapeAll,
-  parseSessionPage,
-  parseAgendaPage,
-  parseSpeakersPage,
-  classifyUrl,
-  writeOutput,
-  setCached,
-} from '@figma-config/core';
-import type { ParsedData, Session, Speaker, AgendaDay } from '@figma-config/core';
+import { buildData, writeOutput, setCached, fetchSitemap } from '@figma-config/core';
 
 const program = new Command();
 
@@ -48,17 +38,17 @@ async function run(): Promise<void> {
   try {
     await mkdir(opts.output, { recursive: true });
 
-    const allUrls = await fetchSitemap(opts.event);
-    const only = opts.only ? opts.only.split(',').map(s => s.trim()) : [];
-    const urls = only.length
-      ? allUrls.filter(url => only.some(t => url.includes(`/${t}`)))
-      : allUrls;
+    // Preview URL count before full scrape when --only filter is active
+    if (opts.only) {
+      const allUrls = await fetchSitemap(opts.event);
+      const only = opts.only.split(',').map(s => s.trim());
+      const filtered = allUrls.filter(url => only.some(t => url.includes(`/${t}`)));
+      spinner.succeed(`Found ${filtered.length} URLs (filtered)`);
+    }
 
-    spinner.succeed(`Found ${urls.length} URLs`);
-
-    spinner.start(`Scraping... 0/${urls.length}`);
-    const htmlMap = await scrapeAll(
-      urls,
+    spinner.start('Scraping...');
+    const data = await buildData(
+      opts.event,
       {
         delay: parseInt(opts.delay, 10),
         cacheOnly: opts.cacheOnly,
@@ -70,60 +60,10 @@ async function run(): Promise<void> {
           : `Scraping... ${i + 1}/${total}`;
       },
     );
-    spinner.succeed(`Scraped ${htmlMap.size} pages`);
 
-    spinner.start('Parsing...');
-    const sessions: Session[] = [];
-    const speakers: Speaker[] = [];
-    let agenda: AgendaDay[] = [];
-
-    for (const [url, html] of htmlMap) {
-      const type = classifyUrl(url);
-      if (type === 'session' || type === 'event') {
-        sessions.push(parseSessionPage(html, url));
-      } else if (type === 'agenda') {
-        agenda = parseAgendaPage(html);
-      } else if (type === 'speakers') {
-        speakers.push(...parseSpeakersPage(html));
-      }
-    }
-
-    // Always rebuild agenda from individual sessions — the agenda page SSR
-    // only renders a small featured subset, not the full schedule.
-    if (sessions.length > 0) {
-      const dayMap = new Map<string, Session[]>();
-      for (const s of sessions) {
-        const list = dayMap.get(s.date) ?? [];
-        list.push(s);
-        dayMap.set(s.date, list);
-      }
-      agenda = Array.from(dayMap.entries())
-        .sort(([a], [b]) => a.localeCompare(b))
-        .map(([date, daySessions]) => ({ date, sessions: daySessions }));
-    }
-
-    // Merge speakers from individual session pages — speakers page SSR only
-    // renders featured speakers. Session pages embed the full speaker roster.
-    const speakerMap = new Map<string, Speaker>();
-    for (const sp of speakers) speakerMap.set(sp.name, sp);
-    for (const s of sessions) {
-      for (const sp of s.speakers) {
-        if (!speakerMap.has(sp.name)) speakerMap.set(sp.name, sp);
-      }
-    }
-    const mergedSpeakers = Array.from(speakerMap.values());
-
-    spinner.succeed(`Parsed ${sessions.length} sessions, ${mergedSpeakers.length} speakers`);
+    spinner.succeed(`Parsed ${data.sessions.length} sessions, ${data.speakers.length} speakers`);
 
     spinner.start('Writing output...');
-    const data: ParsedData = {
-      sessions,
-      speakers: mergedSpeakers,
-      agenda,
-      event: opts.event,
-      scrapedAt: new Date().toISOString(),
-    };
-
     await writeOutput(data, opts.output);
     await setCached('data.json', JSON.stringify(data));
     spinner.succeed(`Done → ${opts.output}`);

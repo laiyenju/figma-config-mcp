@@ -1,7 +1,7 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
-import { getCached, isCacheStale } from '@figma-config/core';
+import { getCached, isCacheStale, setCached, buildData } from '@figma-config/core';
 import type { ParsedData } from '@figma-config/core';
 import {
   getAgenda,
@@ -12,21 +12,18 @@ import {
 } from './tools.js';
 
 const DATA_CACHE_KEY = 'data.json';
+const DEFAULT_EVENT = 'san-francisco';
 
 async function loadData(): Promise<ParsedData> {
   const stale = await isCacheStale(DATA_CACHE_KEY);
-  if (stale) {
-    throw new Error(
-      'Data is missing or older than 24 hours. Run `npx figma-config-llms-txt` to refresh.',
-    );
+  if (!stale) {
+    const raw = await getCached(DATA_CACHE_KEY);
+    if (raw) return JSON.parse(raw) as ParsedData;
   }
-  const raw = await getCached(DATA_CACHE_KEY);
-  if (!raw) {
-    throw new Error(
-      'data.json not found in cache. Run `npx figma-config-llms-txt` first.',
-    );
-  }
-  return JSON.parse(raw) as ParsedData;
+  // Cache missing or expired — auto-scrape (first run or 24h refresh)
+  const data = await buildData(DEFAULT_EVENT);
+  await setCached(DATA_CACHE_KEY, JSON.stringify(data));
+  return data;
 }
 
 const server = new Server(

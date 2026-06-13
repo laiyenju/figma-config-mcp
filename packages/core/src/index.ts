@@ -12,3 +12,4 @@ export {
   formatLlmsFullTxt,
   writeOutput,
 } from './formatter.js';
+export { buildData } from './pipeline.js';
