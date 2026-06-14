@@ -8,3 +8,4 @@ e2e-output/
 notes/
 mcp-*.txt
 .vercel/
+.claude/
