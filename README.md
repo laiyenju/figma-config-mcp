@@ -9,8 +9,8 @@
 Figma Config 是 Figma 的設計年會。這套工具爬取年會官方網站，把全部議程、講者資訊與場次說明整理成結構化資料，節省 LLM 透過 web fetch 消耗的 token 數、避免資訊幻覺。
 
 目前提供兩種使用方式：
-1. **快速使用：**在 Anthropic Claude 的瀏覽器或 Desktop App，完成連結 MCP 伺服器後，直接在 Claude 中查詢
-2. **額外開發：**用 CLI 工具把資料匯出到本地，做後續加工處理
+1. **快速使用：** 在 Anthropic Claude 的瀏覽器或 Desktop App，完成連結 MCP 伺服器後，直接在 Claude 中查詢
+2. **額外開發：** 用 CLI 工具把資料匯出到本地，做後續加工處理
 
 目前收錄 **2026 年舊金山場次**（6 月 24–25 日）的完整資料。
 
@@ -33,7 +33,10 @@ Figma Config 是 Figma 的設計年會。這套工具爬取年會官方網站，
 
 ## 如何設定
 
-### 【以瀏覽器使用 Claude 的設定方式】
+根據你使用 Claude 的習慣，分為以瀏覽器使用、以 Desktop App 使用兩種，分別有不同的設定方式。
+非開發者、不想要佔用個人電腦本地端過多資料，**推薦採用【以瀏覽器使用 Claude】** 的設定方式。
+
+### 【設定方式 1：以瀏覽器使用 Claude】
 
 | 步驟 | 操作 | 截圖 |
 |---|---|---|
@@ -42,7 +45,7 @@ Figma Config 是 Figma 的設計年會。這套工具爬取年會官方網站，
 | 3 | 填入 **Name**：`Figma Config`（可自行取名）<br>填入 **URL**：`https://figma-config-llms-txt-mcp.vercel.app/mcp`<br>點選 **Add** | ![](assets/setup-3-form.png) |
 | 4 | 見到工具權限頁面代表設定成功 | ![](assets/setup-4-success.png) |
 
-### 【以 Desktop App 使用 Claude 的設定方式】
+### 【設定方式 2：以 Desktop App 使用 Claude 的設定方式】
 
 此方式也適用於 cursor 等支援 Anthropic MCP 規格的其他 Desktop App
 
