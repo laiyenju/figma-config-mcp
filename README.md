@@ -57,21 +57,23 @@ Google 的講者有誰？
 
 ## 給開發者
 
-### 匯出資料（CLI 工具）
+這個 monorepo 由三個套件組成，分工明確：爬取解析、資料匯出、查詢介面各自獨立，可單獨使用或組合運作。
 
-```bash
-npx figma-config-llms-txt
+```mermaid
+flowchart LR
+    A[config.figma.com] -->|爬取 + 解析| B[@yenlai/figma-config-core]
+    B --> C[figma-config-llms-txt]
+    C -->|輸出 data.json| D[figma-config-2026-mcp]
+    D -->|5 個查詢工具| E[Claude]
 ```
 
-把所有場次、講者、議程匯出成 Markdown 和 `llms.txt` 格式，可直接貼入任何 LLM 或存成本地檔案。完整說明請見 [packages/cli](packages/cli)。
+### 套件
 
-### 套件結構
-
-| 套件 | 說明 | 文件 |
-|---|---|---|
-| `figma-config-2026-mcp` | MCP 伺服器（Vercel 遠端 + 本地 stdio） | [packages/mcp](packages/mcp) |
-| `figma-config-llms-txt` | CLI 匯出工具 | [packages/cli](packages/cli) |
-| `@yenlai/figma-config-core` | 共用爬蟲與解析器（內部使用） | [packages/core](packages/core) |
+| 套件 | 角色 | 說明 | 文件 |
+|---|---|---|---|
+| `@yenlai/figma-config-core` | 核心引擎 | 爬蟲、解析、格式化；`cli` 與 `mcp` 共同依賴 | [packages/core](packages/core) |
+| `figma-config-llms-txt` | 資料生產者 | 執行爬取流程，輸出 `data.json`、Markdown、`llms.txt` | [packages/cli](packages/cli) |
+| `figma-config-2026-mcp` | 查詢介面 | 讀取 `data.json`，透過 MCP 協定提供 5 個工具給 Claude | [packages/mcp](packages/mcp) |
 
 各套件均有獨立的 README，提供完整的安裝與使用說明。
 
