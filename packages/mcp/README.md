@@ -1,72 +1,60 @@
 # figma-config-2026-mcp
 
-MCP server for [Figma Config 2026](https://config.figma.com). Query sessions, speakers, and the full agenda from Claude — in the browser or on the desktop.
+MCP server that exposes Figma Config conference data as 5 queryable tools
+for Claude and other MCP-compatible clients. Runs in two modes: local stdio
+(npm) and hosted HTTP (Vercel).
 
-## Install
+## npm
 
-Two options depending on how you use Claude:
+> **Pending** — `figma-config-2026-mcp` is awaiting npm approval.
+> Use the Vercel remote URL in the meantime: `https://figma-config-llms-txt-mcp.vercel.app/mcp`
 
-### Option A — claude.ai browser (zero install)
+Once published:
 
-Go to **claude.ai → Settings → Integrations → Add integration** and paste:
-
-```
-https://figma-config-llms-txt-mcp.vercel.app/mcp
-```
-
-That's it. No npm, no config file.
-
-### Option B — Claude Desktop / Cursor (local)
-
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "figma-config-2026": {
-      "command": "npx",
-      "args": ["figma-config-2026-mcp"]
-    }
-  }
-}
+```bash
+npx figma-config-2026-mcp
 ```
 
-For Cursor or other MCP clients:
+Requires Node.js ≥ 18. ESM only.
 
-```json
-{
-  "figma-config-2026": {
-    "command": "npx",
-    "args": ["figma-config-2026-mcp"]
-  }
-}
-```
+## Source files
 
-> On first use, the local server scrapes the conference site (~90 seconds). Subsequent requests use a 24-hour local cache at `~/.cache/figma-config/` and respond instantly. The remote server (Option A) uses pre-committed static data and is always instant.
+| File | Purpose |
+|---|---|
+| `src/index.ts` | stdio entry point — loads data from cache (or scrapes on cold start), starts MCP server |
+| `src/server.ts` | MCP `Server` instance — defines 5 tool schemas, routes `tools/call` requests |
+| `src/tools.ts` | Tool implementations: `getAgenda`, `getSession`, `getSpeakers`, `searchSessions`, `getEventSummary` |
+| `api/mcp.ts` | Vercel HTTP handler — plain JSON-RPC endpoint, reads pre-committed `data/data.json` |
+| `data/data.json` | Static data snapshot committed for the Vercel deployment |
+
+## Two execution modes
+
+**stdio (local)** — `npx figma-config-2026-mcp`. On cold start, scrapes `config.figma.com`
+(~90 seconds) and caches at `~/.cache/figma-config/` for 24 hours. Subsequent starts are instant.
+
+**HTTP (Vercel)** — Deployed at `https://figma-config-llms-txt-mcp.vercel.app/mcp`.
+Serves from pre-committed `data/data.json` — always instant, no scraping.
 
 ## Tools
 
 | Tool | Description |
 |---|---|
-| `get_agenda` | Full agenda, filterable by date / tag / stage |
-| `get_session` | Single session by UUID or fuzzy title match |
+| `get_agenda` | Agenda overview or filtered session list (by date / tag / stage) |
+| `get_session` | Full session details by UUID or fuzzy title match |
 | `get_speakers` | Speaker list, filterable by name or company |
-| `search_sessions` | Full-text keyword search across sessions |
+| `search_sessions` | Full-text fuzzy search across titles, descriptions, tags, and speakers |
 | `get_event_summary` | High-level event overview for LLM context |
 
-## Example prompts
+## Constraints
 
-```
-What sessions are on the Main Stage on June 25?
-Find sessions about AI or machine learning.
-Who's speaking from Google?
-Tell me about the opening keynote.
-```
+- Node.js ≥ 18 (stdio mode); ESM only
+- stdio cold start: ~90 seconds; subsequent starts instant (24h cache)
+- Vercel mode reads static `data/data.json` — updating data requires a new commit + deploy
 
 ## Related
 
-- [`figma-config-llms-txt`](https://www.npmjs.com/package/figma-config-llms-txt) — CLI tool to export data as Markdown / llms.txt files
-- [`@yenlai/figma-config-core`](https://www.npmjs.com/package/@yenlai/figma-config-core) — Shared scraper and parser library
+- [`figma-config-llms-txt`](../cli) — CLI that generates the `data.json` this server reads
+- [`@yenlai/figma-config-core`](../core) — Shared scraper and parser (internal dependency)
 
 ## License
 

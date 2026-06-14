@@ -1,22 +1,35 @@
 # figma-config-llms-txt
 
-Convert [Figma Config 2026](https://config.figma.com) sessions, speakers, and agenda into LLM-friendly Markdown and [`llms.txt`](https://llmstxt.org) format.
+CLI tool that scrapes Figma Config conference data and exports it as
+Markdown and `llms.txt` files. Built on `@yenlai/figma-config-core`.
 
-## Usage
+## npm
+
+Published: `figma-config-llms-txt@1.0.0` ✅
 
 ```bash
 npx figma-config-llms-txt
 ```
 
-Output is written to `./figma-config-output/` by default:
+Requires Node.js ≥ 18.
+
+## Source files
+
+| File | Purpose |
+|---|---|
+| `src/index.ts` | CLI entry point — Commander.js argument parsing, calls `buildData()` + `writeOutput()` from core |
+
+## Output
+
+Written to `./figma-config-output/` by default:
 
 ```
 figma-config-output/
   llms.txt           # Top-level index (llmstxt.org spec)
-  llms-full.txt      # All content merged — paste directly into an LLM
+  llms-full.txt      # All content merged
   agenda.md          # Full agenda sorted by date
   speakers.md        # All speakers
-  data.json          # Structured data (used by the MCP server)
+  data.json          # Structured data (read by the MCP server)
   sessions/
     <uuid>.md        # One file per session
 ```
@@ -38,23 +51,20 @@ figma-config-output/
 ## Examples
 
 ```bash
-# Scrape only sessions
 npx figma-config-llms-txt --only sessions
-
-# Re-scrape with verbose output
 npx figma-config-llms-txt --refresh --verbose
-
-# Output to a custom directory
 npx figma-config-llms-txt --output ~/Desktop/figma-config
 ```
 
 ## Caching
 
-Pages are cached at `~/.cache/figma-config/` with a 24-hour TTL. Subsequent runs within 24 hours use the cache and complete in seconds.
+Pages are cached at `~/.cache/figma-config/` with a 24-hour TTL.
+Subsequent runs within 24 hours complete in seconds.
 
 ## Related
 
-- [`figma-config-2026-mcp`](https://www.npmjs.com/package/figma-config-2026-mcp) — MCP server for querying this data from Claude and other AI clients
+- [`figma-config-2026-mcp`](../mcp) — MCP server that reads the `data.json` this CLI produces
+- [`@yenlai/figma-config-core`](../core) — Shared scraper and parser (internal dependency)
 
 ## License
 
