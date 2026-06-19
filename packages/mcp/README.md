@@ -6,11 +6,6 @@ for Claude and other MCP-compatible clients. Runs in two modes: local stdio
 
 ## npm
 
-> **Pending** — `figma-config-2026-mcp` is awaiting npm approval.
-> Use the Vercel remote URL in the meantime: `https://figma-config-llms-txt-mcp.vercel.app/mcp`
-
-Once published:
-
 ```bash
 npx figma-config-2026-mcp
 ```
